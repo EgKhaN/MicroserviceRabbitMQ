@@ -83,21 +83,18 @@ namespace MicroRabbit.Infra.Bus
         private void StartBasicConsume<T>() where T : Event
         {
             var factory = new ConnectionFactory() { HostName = "localhost", DispatchConsumersAsync = true };
-            using (var connection = factory.CreateConnection())
-            {
-                using (var channel = connection.CreateModel())
-                {
-                    var eventName = typeof(T).Name;
+            var connection = factory.CreateConnection();
 
-                    channel.QueueDeclare(eventName, false, false, false, null);
+            var channel = connection.CreateModel();
 
-                    var consumer = new AsyncEventingBasicConsumer(channel);
-                    consumer.Received += Consomer_Receieved;
+            var eventName = typeof(T).Name;
 
-                    channel.BasicConsume(eventName, true, consumer);
-                }
-            }
+            channel.QueueDeclare(eventName, false, false, false, null);
 
+            var consumer = new AsyncEventingBasicConsumer(channel);
+            consumer.Received += Consomer_Receieved;
+
+            channel.BasicConsume(eventName, true, consumer);
         }
 
         private async Task Consomer_Receieved(object sender, BasicDeliverEventArgs e)
